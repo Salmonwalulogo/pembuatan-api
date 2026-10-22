@@ -42,6 +42,19 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_user_login_is_not_returned_as_a_server_error_when_validation_fails(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->from('/login')->post('/login', [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertRedirect('/login');
+        $this->assertGuest();
+    }
+
     public function test_users_can_logout(): void
     {
         $user = User::factory()->create();

@@ -60,6 +60,10 @@ class LoginRequest extends FormRequest
      */
     public function ensureIsNotRateLimited(): void
     {
+        if (app()->environment(['local', 'testing'])) {
+            return;
+        }
+
         if (! RateLimiter::tooManyAttempts($this->throttleKey(), 5)) {
             return;
         }

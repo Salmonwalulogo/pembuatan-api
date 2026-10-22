@@ -15,6 +15,8 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'printer_name' => env('POS_PRINTER_NAME', 'VSC MP-80 Pro'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

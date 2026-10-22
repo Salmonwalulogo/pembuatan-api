@@ -74,14 +74,50 @@
         if (result.change < 0) return showAlert('Pembayaran belum mencukupi total transaksi.');
         const button = $('payButton'); button.disabled = true;
         try {
-            const response = await fetch('/kasir/transaksi', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify({ items: state.cart.map((item) => ({ product_id: item.id, product_code: item.product_code, product_name: item.name, price: item.price, qty: item.qty })), customer_name: $('customerName').value || null, discount_percent: numberValue('discountPercent'), discount_nominal: numberValue('discountNominal'), tax: numberValue('tax'), other_fee: numberValue('otherFee'), paid_amount: result.paid, payment_method: state.method }) });
+            const payload = {
+                items: state.cart.map((item) => ({ product_id: item.id, product_code: item.product_code, product_name: item.name, price: item.price, qty: item.qty })),
+                customer_name: $('customerName').value || null,
+                discount_percent: numberValue('discountPercent'),
+                discount_nominal: numberValue('discountNominal'),
+                tax: numberValue('tax'),
+                other_fee: numberValue('otherFee'),
+                paid_amount: result.paid,
+                payment_method: state.method,
+            };
+
+            const response = await fetch('/kasir/transaksi', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: JSON.stringify(payload) });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message || Object.values(data.errors || {}).flat()[0] || 'Transaksi gagal disimpan.');
+
+            const responseStruk = await fetch('/kasir/struk', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+                body: JSON.stringify({
+                    transaction_id: data.transaction.id,
+                    transaction_number: data.transaction.transaction_number,
+                    items: payload.items.map((item) => ({ name: item.product_name, qty: item.qty, price: item.price })),
+                    customer_name: $('customerName').value || 'Pelanggan umum',
+                    subtotal: data.transaction.subtotal,
+                    discount: data.transaction.discount,
+                    tax: data.transaction.tax,
+                    other_fee: data.transaction.other_fee,
+                    grand_total: data.transaction.grand_total,
+                    paid_amount: data.transaction.paid_amount,
+                    change_amount: data.transaction.change_amount,
+                    payment_method: data.transaction.payment_method,
+                }),
+            });
+
+            const strukData = await responseStruk.json().catch(() => ({}));
+            if (!responseStruk.ok && !strukData.success) {
+                showAlert(strukData.message || 'Struk gagal dicetak, transaksi tetap tersimpan.');
+            }
+
             fillReceipt(data.transaction, result); document.querySelector('.cashier-shell').style.display = 'none'; $('receipt').style.display = 'block';
             setTimeout(() => window.print(), 150);
         } catch (error) { showAlert(error.message); button.disabled = false; }
     };
-    const fillReceipt = (transaction, result) => { $('receiptNumber').textContent = transaction.transaction_number; $('receiptDate').textContent = new Date().toLocaleString('id-ID'); $('receiptCustomer').textContent = $('customerName').value || 'Pelanggan umum'; $('receiptItems').innerHTML = state.cart.map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${item.qty}</td><td>${rupiah(item.price)}</td><td>${rupiah(item.price * item.qty)}</td></tr>`).join(''); $('receiptPrintItems').innerHTML = state.cart.map((item) => `<div class="receipt-print-item"><span>${escapeHtml(item.name)}</span><span>${item.qty} x ${rupiah(item.price)} = ${rupiah(item.price * item.qty)}</span></div>`).join(''); $('receiptSubtotal').textContent = rupiah(result.subtotal); $('receiptDiscount').textContent = rupiah(result.discount); $('receiptTax').textContent = rupiah(numberValue('tax')); $('receiptFee').textContent = rupiah(numberValue('otherFee')); $('receiptTotal').textContent = rupiah(result.total); $('receiptPaid').textContent = rupiah(result.paid); $('receiptChange').textContent = rupiah(result.change); $('receiptMethod').textContent = document.querySelector('.method.active').textContent.trim(); };
+    const fillReceipt = (transaction, result) => { $('receiptNumber').textContent = transaction.transaction_number; $('receiptDate').textContent = new Date().toLocaleString('id-ID'); $('receiptCustomer').textContent = $('customerName').value || 'Pelanggan umum'; $('receiptItems').innerHTML = state.cart.map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${item.qty}</td><td>${rupiah(item.price)}</td><td>${rupiah(item.price * item.qty)}</td></tr>`).join(''); $('receiptPrintItems').innerHTML = state.cart.map((item) => `<div class="receipt-print-item"><span>${escapeHtml(item.name)}</span><span>${item.qty} x ${rupiah(item.price)} = ${rupiah(item.price * item.qty)}</span></div>`).join(''); $('receiptSubtotal').textContent = rupiah(transaction.subtotal || result.subtotal); $('receiptDiscount').textContent = rupiah(transaction.discount || result.discount); $('receiptTax').textContent = rupiah(transaction.tax || numberValue('tax')); $('receiptFee').textContent = rupiah(transaction.other_fee || numberValue('otherFee')); $('receiptTotal').textContent = rupiah(transaction.grand_total || result.total); $('receiptPaid').textContent = rupiah(transaction.paid_amount || result.paid); $('receiptChange').textContent = rupiah(transaction.change_amount || result.change); $('receiptMethod').textContent = (transaction.payment_method || state.method || 'Tunai').toString(); };
     const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
     $('productSearch').addEventListener('input', (event) => { $('clearSearch').classList.toggle('d-none', !event.target.value); renderProducts(event.target.value); });
     $('clearSearch').addEventListener('click', () => { $('productSearch').value = ''; $('clearSearch').classList.add('d-none'); renderProducts(); $('productSearch').focus(); });

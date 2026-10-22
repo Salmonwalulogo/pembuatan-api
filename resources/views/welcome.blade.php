@@ -1780,9 +1780,14 @@
                 <a href="#features">Keunggulan</a>
                 <a href="#community">Tentang Kami</a>
                 @auth
-                    @if(auth()->user()->isAdmin())
+                    @php
+                        $user = auth()->user();
+                        $isAdmin = method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+                        $isCashier = method_exists($user, 'isCashier') ? $user->isCashier() : false;
+                    @endphp
+                    @if($isAdmin)
                         <a href="{{ route('admin.dashboard') }}" class="btn-nav btn-login">Dashboard Admin</a>
-                    @elseif(auth()->user()->isCashier())
+                    @elseif($isCashier)
                         <a href="{{ route('cashier.index') }}" class="btn-nav btn-login">Buka Kasir</a>
                     @else
                         <a href="{{ route('dashboard') }}" class="btn-nav btn-login">Dashboard</a>
@@ -1834,7 +1839,13 @@
                                     Buat Akun
                                 </a>
                             @else
-                                <a href="{{ auth()->user()->isCashier() ? route('cashier.index') : (auth()->user()->isAdmin() ? route('admin.dashboard') : route('dashboard')) }}" class="btn-hero-primary">
+                                @php
+                                    $user = auth()->user();
+                                    $isAdmin = method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+                                    $isCashier = method_exists($user, 'isCashier') ? $user->isCashier() : false;
+                                    $dashboardRoute = $isAdmin ? 'admin.dashboard' : ($isCashier ? 'cashier.index' : 'dashboard');
+                                @endphp
+                                <a href="{{ route($dashboardRoute) }}" class="btn-hero-primary">
                                     <i class="bi bi-arrow-right-circle"></i>
                                     Masuk ke Aplikasi
                                 </a>
@@ -1973,7 +1984,7 @@
 
             <div class="market-stack-cards">
                 <article class="market-stack-card" data-x="-35" data-y="-20" data-rotate="-8" data-w="16" data-h="22" data-sm-x="-21" data-sm-y="-27" data-sm-w="38" data-sm-h="16">
-                    <div class="market-card-top"><span>01 / Segar</span><i class="bi bi-stars"></i></div>
+                    <div class="market-card-top"><span>01 / Segar</span><i class="bi bi-basket2-fill"></i></div>
                     <div class="market-card-art"><i class="bi bi-basket2-fill"></i></div>
                     <div class="market-card-bottom"><h3>Buah &amp; Sayur</h3><p>Segar setiap hari</p></div><span class="market-card-target"></span>
                 </article>

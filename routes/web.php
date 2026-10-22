@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\CashierController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StrukController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CashierController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,8 +35,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 Route::middleware(['auth', 'kasir'])->group(function () {
     Route::get('/kasir', [CashierController::class, 'index'])->name('cashier.index');
-    Route::post('/kasir/transaksi', [CashierController::class, 'store'])
-        ->name('cashier.store');
+    Route::post('/kasir/transaksi', [CashierController::class, 'store'])->name('cashier.store');
+    Route::post('/kasir/struk', [StrukController::class, 'struk'])->name('cashier.struk');
 });
 
 require __DIR__.'/auth.php';
