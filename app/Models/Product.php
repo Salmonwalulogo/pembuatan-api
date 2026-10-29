@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
+    protected $appends = ['image_url'];
+
     protected $fillable = [
         'name',
         'product_code',
@@ -21,4 +23,9 @@ class Product extends Model
         'is_active' => 'boolean',
         'price' => 'decimal:2',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? asset('storage/'.$this->image) : null;
+    }
 }

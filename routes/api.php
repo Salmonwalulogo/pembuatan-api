@@ -9,8 +9,12 @@ Route::name('api.')->group(function () {
         ->middleware('throttle:6,1')
         ->name('login');
 
-    Route::middleware(['auth:sanctum', 'admin', 'abilities:products:manage'])->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', [AuthController::class, 'user'])->name('user');
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    });
+
+    Route::middleware(['auth:sanctum', 'admin', 'abilities:products:manage'])->group(function () {
         Route::apiResource('products', ProductController::class);
     });
 });

@@ -47,4 +47,11 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Token berhasil dicabut.']);
     }
+
+    public function user(Request $request): JsonResponse
+    {
+        return response()->json([
+            'user' => $request->user()->only(['id', 'name', 'email', 'role']),
+        ]);
+    }
 }

@@ -85,6 +85,24 @@ class ProductApiTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_authenticated_user_can_view_their_profile_and_guest_cannot(): void
+    {
+        $this->getJson('/api/user')->assertUnauthorized();
+
+        $admin = User::factory()->create(['password' => 'password']);
+        $admin->forceFill(['role' => 'admin'])->save();
+        $token = $this->postJson('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertOk()->json('token');
+
+        $this->withToken($token)->getJson('/api/user')
+            ->assertOk()
+            ->assertJsonPath('user.id', $admin->id)
+            ->assertJsonPath('user.email', $admin->email)
+            ->assertJsonMissingPath('user.password');
+    }
+
     public function test_product_api_validates_product_fields_and_revokes_tokens_on_logout(): void
     {
         $admin = User::factory()->create(['password' => 'password']);
@@ -110,5 +128,35 @@ class ProductApiTest extends TestCase
 
         $this->withToken($token)->getJson('/api/products')
             ->assertUnauthorized();
+    }
+
+    public function test_logout_revokes_only_the_active_token_and_user_endpoint_rejects_it_afterward(): void
+    {
+        $admin = User::factory()->create(['password' => 'password']);
+        $admin->forceFill(['role' => 'admin'])->save();
+        $login = $this->postJson('/api/login', [
+            'email' => $admin->email,
+            'password' => 'password',
+        ])->assertOk();
+        $activeToken = $login->json('token');
+        $activeTokenId = explode('|', $activeToken, 2)[0];
+        $otherToken = $admin->createToken('Another device', ['products:manage']);
+
+        $this->withToken($activeToken)->postJson('/api/logout')
+            ->assertOk()
+            ->assertJsonPath('message', 'Token berhasil dicabut.');
+
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'id' => $activeTokenId,
+        ]);
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'id' => $otherToken->accessToken->id,
+            'tokenable_id' => $admin->id,
+        ]);
+
+        Auth::forgetGuards();
+
+        $this->withToken($activeToken)->getJson('/api/user')->assertUnauthorized();
+        $this->withToken($otherToken->plainTextToken)->getJson('/api/user')->assertOk();
     }
 }

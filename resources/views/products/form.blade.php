@@ -46,9 +46,19 @@
             <label for="image" class="form-label">Gambar Produk</label>
             <input id="image" name="image" type="file" accept="image/*" class="form-control @error('image') is-invalid @enderror">
             @error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <small class="form-text">Gambar dipotong menjadi 1200 × 1200, diberi watermark, dan disimpan sebagai WebP.</small>
             @if($isEdit && $product->image)
                 <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" class="img-thumbnail mt-2" style="max-width:150px">
             @endif
+        </div>
+        <div class="col-md-6">
+            <label for="image_rotation" class="form-label">Rotasi Gambar</label>
+            <select id="image_rotation" name="image_rotation" class="form-select @error('image_rotation') is-invalid @enderror">
+                @foreach([0 => 'Tidak diputar', 90 => '90° searah jarum jam', 180 => '180°', 270 => '90° berlawanan arah jarum jam'] as $degrees => $label)
+                    <option value="{{ $degrees }}" @selected((int) old('image_rotation', 0) === $degrees)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('image_rotation')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6 d-flex align-items-end">
             <div class="form-check form-switch">

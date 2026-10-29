@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Services\ProductImageProcessor;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
@@ -18,7 +19,7 @@ class ProductController extends Controller
         // latest() = urutkan berdasarkan created_at DESC (terbaru di atas)
         // paginate(10) = 10 produk per halaman
         $products = Product::latest()->paginate(10);
-        
+
         return view('products.index', compact('products'));
     }
 
@@ -33,7 +34,7 @@ class ProductController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ProductImageProcessor $images)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -44,18 +45,22 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_rotation' => 'nullable|integer|in:0,90,180,270',
             'is_active' => 'nullable|boolean',
         ]);
 
+        $rotation = (int) ($validated['image_rotation'] ?? 0);
+        unset($validated['image_rotation']);
+
         // Pastikan description tidak null
         $validated['description'] = $validated['description'] ?? '';
-        
+
         // Handle checkbox is_active
         $validated['is_active'] = $request->has('is_active') ? 1 : 0;
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $validated['image'] = $request->file('image')->store('products', 'public');
+            $validated['image'] = $images->store($request->file('image'), $rotation);
         } else {
             $validated['image'] = null;
         }
@@ -85,7 +90,7 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Product $product, ProductImageProcessor $images)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -96,20 +101,27 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'image_rotation' => 'nullable|integer|in:0,90,180,270',
             'is_active' => 'nullable|boolean',
         ]);
 
+        $rotation = (int) ($validated['image_rotation'] ?? 0);
+        unset($validated['image_rotation']);
         $validated['description'] = $validated['description'] ?? '';
         $validated['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image')) {
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $validated['image'] = $request->file('image')->store('products', 'public');
+            $previousImage = $product->image;
+            $validated['image'] = $images->store($request->file('image'), $rotation);
+        } else {
+            $previousImage = null;
         }
 
         $product->update($validated);
+
+        if ($previousImage && $previousImage !== $product->image) {
+            Storage::disk('public')->delete($previousImage);
+        }
 
         return redirect()->route('products.index')
             ->with('success', 'Produk berhasil diperbarui.');

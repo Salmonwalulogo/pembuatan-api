@@ -108,6 +108,9 @@
     <div class="receipt-totals"><div>Subtotal <strong id="receiptSubtotal"></strong></div><div>Diskon <strong id="receiptDiscount"></strong></div><div>Pajak <strong id="receiptTax"></strong></div><div>Biaya lain <strong id="receiptFee"></strong></div><div class="receipt-grand">TOTAL <strong id="receiptTotal"></strong></div><div>Bayar <strong id="receiptPaid"></strong></div><div>Kembali <strong id="receiptChange"></strong></div><div>Metode pembayaran <strong id="receiptMethod"></strong></div></div>
     <p class="receipt-thanks">Terima kasih telah berbelanja.<br>Simpan struk ini sebagai bukti pembayaran.</p>
     <button class="btn btn-dark no-print" onclick="window.print()"><i class="bi bi-printer"></i> CETAK</button>
+    <a id="downloadInvoice" class="btn btn-primary no-print" href="#" data-url="{{ route('cashier.invoice', ['transaction' => '__TRANSACTION_ID__']) }}" hidden>
+        <i class="bi bi-file-earmark-pdf"></i> UNDUH INVOICE PDF
+    </a>
 </section>
 <script>window.cashierProducts = @json($products); window.cashierTransactionNumber = @json($transactionNumber);</script>
 <script src="{{ asset('js/cashier.js') }}"></script>

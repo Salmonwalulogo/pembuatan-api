@@ -2,8 +2,9 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\CashierController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StrukController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +29,6 @@ Route::middleware(['auth', 'admin'])->controller(AdminController::class)->group(
     Route::get('/admin/settings', 'settings')->name('admin.settings');
 });
 
-
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::resource('products', ProductController::class);
 });
@@ -38,5 +38,10 @@ Route::middleware(['auth', 'kasir'])->group(function () {
     Route::post('/kasir/transaksi', [CashierController::class, 'store'])->name('cashier.store');
     Route::post('/kasir/struk', [StrukController::class, 'struk'])->name('cashier.struk');
 });
+
+Route::middleware('auth')->get(
+    '/transaksi/{transaction}/invoice',
+    [InvoiceController::class, 'download']
+)->name('cashier.invoice');
 
 require __DIR__.'/auth.php';
