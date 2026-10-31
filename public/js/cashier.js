@@ -113,11 +113,24 @@
                 showAlert(strukData.message || 'Struk gagal dicetak, transaksi tetap tersimpan.');
             }
 
-            fillReceipt(data.transaction, result); document.querySelector('.cashier-shell').style.display = 'none'; $('receipt').style.display = 'block';
-            setTimeout(() => window.print(), 150);
+            fillReceipt(data.transaction, result);
+            resetTransaction();
+            openReceiptModal();
         } catch (error) { showAlert(error.message); button.disabled = false; }
     };
     const fillReceipt = (transaction, result) => { $('receiptNumber').textContent = transaction.transaction_number; $('receiptDate').textContent = new Date().toLocaleString('id-ID'); $('receiptCustomer').textContent = $('customerName').value || 'Pelanggan umum'; $('receiptItems').innerHTML = state.cart.map((item) => `<tr><td>${escapeHtml(item.name)}</td><td>${item.qty}</td><td>${rupiah(item.price)}</td><td>${rupiah(item.price * item.qty)}</td></tr>`).join(''); $('receiptPrintItems').innerHTML = state.cart.map((item) => `<div class="receipt-print-item"><span>${escapeHtml(item.name)}</span><span>${item.qty} x ${rupiah(item.price)} = ${rupiah(item.price * item.qty)}</span></div>`).join(''); $('receiptSubtotal').textContent = rupiah(transaction.subtotal || result.subtotal); $('receiptDiscount').textContent = rupiah(transaction.discount || result.discount); $('receiptTax').textContent = rupiah(transaction.tax || numberValue('tax')); $('receiptFee').textContent = rupiah(transaction.other_fee || numberValue('otherFee')); $('receiptTotal').textContent = rupiah(transaction.grand_total || result.total); $('receiptPaid').textContent = rupiah(transaction.paid_amount || result.paid); $('receiptChange').textContent = rupiah(transaction.change_amount || result.change); $('receiptMethod').textContent = (transaction.payment_method || state.method || 'Tunai').toString(); const invoice = $('downloadInvoice'); invoice.href = invoice.dataset.url.replace('__TRANSACTION_ID__', encodeURIComponent(transaction.id)); invoice.hidden = false; };
+    const openReceiptModal = () => {
+        $('receiptModal').hidden = false;
+        $('receiptModal').setAttribute('aria-hidden', 'false');
+        document.body.classList.add('receipt-modal-open');
+        $('newTransaction').focus();
+    };
+    const closeReceiptModal = () => {
+        $('receiptModal').hidden = true;
+        $('receiptModal').setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('receipt-modal-open');
+        $('productSearch').focus();
+    };
     const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
     $('productSearch').addEventListener('input', (event) => { $('clearSearch').classList.toggle('d-none', !event.target.value); renderProducts(event.target.value); });
     $('clearSearch').addEventListener('click', () => { $('productSearch').value = ''; $('clearSearch').classList.add('d-none'); renderProducts(); $('productSearch').focus(); });
@@ -128,7 +141,18 @@
     $('clearCart').addEventListener('click', () => { if (state.cart.length && confirm('Kosongkan semua barang di keranjang?')) resetTransaction(); });
     $('cancelTransaction').addEventListener('click', () => { if (confirm('Batalkan transaksi ini?')) resetTransaction(); });
     $('holdTransaction').addEventListener('click', holdTransaction); $('payButton').addEventListener('click', submitPayment);
-    document.addEventListener('keydown', (event) => { if (event.key === 'F2') { event.preventDefault(); $('productSearch').focus(); } if (event.key === 'F4') { event.preventDefault(); $('paidAmount').focus(); } if (event.key === 'Escape') $('cancelTransaction').click(); });
+    document.querySelectorAll('[data-close-receipt]').forEach((button) => button.addEventListener('click', closeReceiptModal));
+    $('newTransaction').addEventListener('click', closeReceiptModal);
+    $('printReceipt').addEventListener('click', () => window.print());
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !$('receiptModal').hidden) {
+            closeReceiptModal();
+            return;
+        }
+        if (event.key === 'F2') { event.preventDefault(); $('productSearch').focus(); }
+        if (event.key === 'F4') { event.preventDefault(); $('paidAmount').focus(); }
+        if (event.key === 'Escape') $('cancelTransaction').click();
+    });
     setInterval(() => { $('currentDateTime').textContent = new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }); }, 1000);
     renderProducts(); renderCart(); renderHeld(); calculateAndRender();
 }());

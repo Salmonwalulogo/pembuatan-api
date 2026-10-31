@@ -57,7 +57,9 @@ class InvoicePdfTest extends TestCase
         $this->actingAs($cashier)
             ->get(route('cashier.index'))
             ->assertOk()
-            ->assertSee('UNDUH INVOICE PDF')
+            ->assertSee('Unduh invoice PDF')
+            ->assertSee('id="receiptModal"', false)
+            ->assertSee('id="newTransaction"', false)
             ->assertSee(route('cashier.invoice', ['transaction' => '__TRANSACTION_ID__']));
     }
 

@@ -72,3 +72,55 @@
     .receipt-grand { font-weight: 700; border-top: 1px dashed #000; margin-top: 4px; padding-top: 5px !important; }
     .receipt-thanks { text-align: center; border-top: 1px dashed #000; padding-top: 8px; margin-top: 8px; }
 }
+
+.receipt-modal[hidden]{display:none}
+.receipt-modal{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:24px;overflow-y:auto}
+.receipt-modal-backdrop{position:fixed;inset:0;width:100%;height:100%;border:0;background:rgba(17,24,48,.58);backdrop-filter:blur(10px);animation:receipt-fade-in .2s ease both}
+.receipt-dialog{position:relative;z-index:1;width:min(600px,100%);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid #ffffffbd;border-radius:26px;background:#fff;box-shadow:0 32px 100px #10152e52;animation:receipt-pop-in .28s cubic-bezier(.2,.8,.2,1) both}
+.receipt-modal-header{position:relative;display:flex;flex-direction:column;align-items:center;padding:30px 28px 24px;overflow:hidden;border-radius:25px 25px 0 0;background:radial-gradient(circle at 50% -40%,#8884ff 0,transparent 58%),linear-gradient(145deg,#282750,#423d9e 58%,#5c56de);color:#fff;text-align:center}
+.receipt-modal-header:after{position:absolute;right:-44px;bottom:-92px;width:180px;height:180px;border:1px solid #ffffff20;border-radius:50%;content:"";box-shadow:0 0 0 22px #ffffff08,0 0 0 44px #ffffff05}
+.receipt-success-icon{position:relative;z-index:1;display:grid;width:54px;height:54px;place-items:center;border:1px solid #ffffff55;border-radius:18px;background:linear-gradient(145deg,#ffffff38,#ffffff13);box-shadow:0 10px 24px #14133d4d;color:#c9ffe3;font-size:28px}
+.receipt-modal-eyebrow{position:relative;z-index:1;margin-top:14px;color:#c8c7ff;font-size:9px;font-weight:800;letter-spacing:2px}
+.receipt-modal-header h2{position:relative;z-index:1;margin:5px 0 3px;color:#fff;font-size:23px;font-weight:800;letter-spacing:-.4px}
+.receipt-modal-header p{position:relative;z-index:1;margin:0;color:#e0e0ff;font-size:12px}
+.receipt-modal-close{position:absolute;top:17px;right:17px;z-index:2;display:grid;width:34px;height:34px;place-items:center;border:1px solid #ffffff30;border-radius:11px;background:#ffffff13;color:#fff;transition:background .18s,transform .18s}
+.receipt-modal-close:hover{transform:rotate(5deg);background:#ffffff2b}
+.receipt-dialog .receipt{display:block;width:auto;margin:0;padding:24px 34px 14px;border:0;border-radius:0;box-shadow:none;font-size:12px}
+.receipt-dialog .receipt-header{padding-bottom:14px}
+.receipt-dialog .receipt-header h1{font-size:18px}
+.receipt-dialog .receipt-header p{margin-top:4px;font-size:11px}
+.receipt-dialog .receipt-info{gap:10px 20px;padding:14px 0}
+.receipt-dialog .receipt-info div{font-size:10px}
+.receipt-dialog .receipt-info strong{font-size:11px}
+.receipt-dialog .receipt table{margin:14px 0}
+.receipt-dialog .receipt th{padding-bottom:8px;font-size:9px}
+.receipt-dialog .receipt td{padding:9px 0;font-size:11px}
+.receipt-dialog .receipt-totals{padding-top:2px}
+.receipt-dialog .receipt-totals div{padding:5px 0;font-size:11px}
+.receipt-dialog .receipt-grand{margin:7px 0;padding:10px 0!important;font-size:14px}
+.receipt-dialog .receipt-thanks{margin:16px 0 8px;font-size:10px}
+.receipt-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 34px 26px}
+.receipt-actions [hidden]{display:none!important}
+.receipt-actions button,.receipt-actions a{display:flex;min-height:43px;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;font:inherit;font-size:12px;font-weight:750;text-decoration:none;transition:transform .18s,box-shadow .18s,background .18s}
+.receipt-actions button:hover,.receipt-actions a:hover{transform:translateY(-2px)}
+.receipt-print-button{background:linear-gradient(110deg,#514ce0,#726cf3);box-shadow:0 8px 18px #5b56e83b;color:#fff}
+.receipt-print-button:hover{box-shadow:0 12px 24px #5b56e852}
+.receipt-download-button{background:#f2f2ff;color:#514ce0}
+.receipt-download-button:hover{background:#e8e7ff;color:#403bb7}
+.receipt-new-button{grid-column:1/-1;border:1px solid #e6e9f1!important;background:#fff;color:#5d667a}
+.receipt-new-button:hover{background:#f8f9fc}
+body.receipt-modal-open{overflow:hidden}
+@keyframes receipt-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes receipt-pop-in{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:600px){.receipt-modal{padding:12px}.receipt-dialog{max-height:calc(100vh - 24px);border-radius:20px}.receipt-modal-header{padding:24px 18px 20px;border-radius:19px 19px 0 0}.receipt-success-icon{width:46px;height:46px;border-radius:15px}.receipt-modal-header h2{font-size:20px}.receipt-dialog .receipt{padding:20px 20px 10px}.receipt-actions{padding:0 20px 20px;gap:7px}.receipt-actions button,.receipt-actions a{min-height:42px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.receipt-modal-backdrop,.receipt-dialog{animation:none}.receipt-modal-close,.receipt-actions button,.receipt-actions a{transition:none}}
+
+@media print{
+    body.receipt-modal-open{overflow:visible}
+    body.receipt-modal-open>*{visibility:hidden}
+    body.receipt-modal-open #receiptModal,body.receipt-modal-open #receiptModal *{visibility:visible}
+    body.receipt-modal-open #receiptModal{position:absolute;inset:0;display:block!important;padding:0;overflow:visible;background:#fff}
+    body.receipt-modal-open .receipt-modal-backdrop,body.receipt-modal-open .receipt-modal-header,body.receipt-modal-open .receipt-actions{display:none!important}
+    body.receipt-modal-open .receipt-dialog{width:80mm;max-height:none;margin:0 auto;overflow:visible;border:0;border-radius:0;box-shadow:none;animation:none}
+    body.receipt-modal-open .receipt-dialog .receipt{width:80mm;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;color:#000;font:12px "Courier New",monospace}
+}

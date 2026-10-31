@@ -1,4 +1,9 @@
 :root{--admin-ink:#172033;--admin-muted:#718096;--admin-primary:#5b56e8;--admin-primary-dark:#453fd0;--admin-surface:#fff;--admin-bg:#f4f6fb}
+#transaction-notifications{position:fixed;top:1rem;right:1rem;z-index:1080;display:grid;gap:.75rem;width:min(24rem,calc(100vw - 2rem))}
+.transaction-notification{position:relative;padding:1rem 2.5rem 1rem 1rem;border:1px solid #d5d9fc;border-left:4px solid var(--admin-primary);border-radius:12px;background:#fff;color:var(--admin-ink);box-shadow:0 12px 32px #20284a24}
+.transaction-notification strong{display:block;margin-bottom:.3rem}
+.transaction-notification p{margin:0;color:var(--admin-muted);font-size:.9rem;overflow-wrap:anywhere}
+.transaction-notification-dismiss{position:absolute;top:.5rem;right:.7rem;border:0;background:transparent;color:var(--admin-muted);font-size:1.35rem;line-height:1}
 body{background:var(--admin-bg);color:var(--admin-ink)}
 .admin-sidebar{width:250px;min-height:calc(100vh - 0px);background:linear-gradient(180deg,#1b2140 0%,#252b55 62%,#343073 100%)!important;flex:0 0 250px;box-shadow:8px 0 28px #20284a18}
 .admin-sidebar h4{font-size:17px;padding:10px 8px 18px;border-bottom:1px solid #ffffff1c}

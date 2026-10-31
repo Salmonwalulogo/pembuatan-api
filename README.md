@@ -57,3 +57,16 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Notifikasi Transaksi Real-Time
+
+Dashboard admin menerima notifikasi ketika kasir berhasil menyimpan transaksi. Event `OrderPlaced` dikirim melalui private channel `transactions`; hanya pengguna dengan role admin yang dapat berlangganan. Payload notifikasi hanya berisi nomor transaksi, total, metode pembayaran, dan nama kasir.
+
+Broadcasting memakai Laravel Reverb dan Laravel Echo. Salin `.env.example` ke `.env`, lalu pastikan `BROADCAST_CONNECTION=reverb`, `QUEUE_CONNECTION=database`, serta nilai `REVERB_*` dan `VITE_REVERB_*` sesuai host aplikasi. Jalankan proses berikut pada terminal terpisah:
+
+```bash
+php artisan reverb:start
+composer run dev
+```
+
+`composer run dev` menjalankan web server, worker antrean, dan Vite. Buka dashboard admin di satu browser, lalu simpan transaksi dari sesi kasir lain untuk menguji notifikasi. Untuk produksi, jalankan Reverb dan worker antrean sebagai proses terkelola dan batasi `allowed_origins` pada `config/reverb.php` ke domain aplikasi.

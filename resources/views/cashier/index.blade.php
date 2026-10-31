@@ -100,18 +100,37 @@
     </section>
 </main>
 
-<section id="receipt" class="receipt">
-    <div class="receipt-header"><h1>{{ strtoupper(config('app.name', 'SABU JAYA MART')) }}</h1><p>Struk Pembayaran</p></div>
-    <div class="receipt-info"><div>No. Transaksi <strong id="receiptNumber"></strong></div><div>Tanggal <strong id="receiptDate"></strong></div><div>Kasir <strong id="receiptCashier">{{ auth()->user()?->name ?? 'Kasir Utama' }}</strong></div><div>Pelanggan <strong id="receiptCustomer">Pelanggan umum</strong></div></div>
-    <table class="receipt-screen-items"><thead><tr><th>Nama Barang</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody id="receiptItems"></tbody></table>
-    <div id="receiptPrintItems" class="receipt-print-items"></div>
-    <div class="receipt-totals"><div>Subtotal <strong id="receiptSubtotal"></strong></div><div>Diskon <strong id="receiptDiscount"></strong></div><div>Pajak <strong id="receiptTax"></strong></div><div>Biaya lain <strong id="receiptFee"></strong></div><div class="receipt-grand">TOTAL <strong id="receiptTotal"></strong></div><div>Bayar <strong id="receiptPaid"></strong></div><div>Kembali <strong id="receiptChange"></strong></div><div>Metode pembayaran <strong id="receiptMethod"></strong></div></div>
-    <p class="receipt-thanks">Terima kasih telah berbelanja.<br>Simpan struk ini sebagai bukti pembayaran.</p>
-    <button class="btn btn-dark no-print" onclick="window.print()"><i class="bi bi-printer"></i> CETAK</button>
-    <a id="downloadInvoice" class="btn btn-primary no-print" href="#" data-url="{{ route('cashier.invoice', ['transaction' => '__TRANSACTION_ID__']) }}" hidden>
-        <i class="bi bi-file-earmark-pdf"></i> UNDUH INVOICE PDF
-    </a>
-</section>
+<div id="receiptModal" class="receipt-modal" hidden>
+    <button class="receipt-modal-backdrop" type="button" aria-label="Tutup popup struk" data-close-receipt></button>
+    <section class="receipt-dialog" role="dialog" aria-modal="true" aria-labelledby="receiptModalTitle">
+        <header class="receipt-modal-header">
+            <button class="receipt-modal-close" type="button" aria-label="Tutup popup struk" data-close-receipt>
+                <i class="bi bi-x-lg"></i>
+            </button>
+            <span class="receipt-success-icon"><i class="bi bi-check-lg"></i></span>
+            <span class="receipt-modal-eyebrow">PEMBAYARAN BERHASIL</span>
+            <h2 id="receiptModalTitle">Transaksi selesai</h2>
+            <p>Terima kasih, pembayaran Anda sudah tercatat.</p>
+        </header>
+
+        <section id="receipt" class="receipt" aria-label="Rincian struk pembayaran">
+            <div class="receipt-header"><h1>{{ strtoupper(config('app.name', 'SABU JAYA MART')) }}</h1><p>Struk Pembayaran</p></div>
+            <div class="receipt-info"><div>No. Transaksi <strong id="receiptNumber"></strong></div><div>Tanggal <strong id="receiptDate"></strong></div><div>Kasir <strong id="receiptCashier">{{ auth()->user()?->name ?? 'Kasir Utama' }}</strong></div><div>Pelanggan <strong id="receiptCustomer">Pelanggan umum</strong></div></div>
+            <table class="receipt-screen-items"><thead><tr><th>Nama Barang</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead><tbody id="receiptItems"></tbody></table>
+            <div id="receiptPrintItems" class="receipt-print-items"></div>
+            <div class="receipt-totals"><div>Subtotal <strong id="receiptSubtotal"></strong></div><div>Diskon <strong id="receiptDiscount"></strong></div><div>Pajak <strong id="receiptTax"></strong></div><div>Biaya lain <strong id="receiptFee"></strong></div><div class="receipt-grand">TOTAL <strong id="receiptTotal"></strong></div><div>Bayar <strong id="receiptPaid"></strong></div><div>Kembali <strong id="receiptChange"></strong></div><div>Metode pembayaran <strong id="receiptMethod"></strong></div></div>
+            <p class="receipt-thanks">Terima kasih telah berbelanja.<br>Simpan struk ini sebagai bukti pembayaran.</p>
+        </section>
+
+        <footer class="receipt-actions no-print">
+            <button id="printReceipt" class="receipt-print-button" type="button"><i class="bi bi-printer"></i> Cetak struk</button>
+            <a id="downloadInvoice" class="receipt-download-button" href="#" data-url="{{ route('cashier.invoice', ['transaction' => '__TRANSACTION_ID__']) }}" hidden>
+                <i class="bi bi-file-earmark-pdf"></i> Unduh invoice PDF
+            </a>
+            <button id="newTransaction" class="receipt-new-button" type="button"><i class="bi bi-plus-lg"></i> Transaksi baru</button>
+        </footer>
+    </section>
+</div>
 <script>window.cashierProducts = @json($products); window.cashierTransactionNumber = @json($transactionNumber);</script>
 <script src="{{ asset('js/cashier.js') }}"></script>
 </body>

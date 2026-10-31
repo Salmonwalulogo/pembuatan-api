@@ -20,6 +20,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
+        @if (auth()->user()?->isAdmin())
+            <div id="transaction-notifications" aria-live="polite" aria-relevant="additions"></div>
+        @endif
+
         <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
             @include('layouts.navigation')
 

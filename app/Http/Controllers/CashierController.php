@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\OrderPlaced;
 use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\JsonResponse;
@@ -129,6 +130,13 @@ class CashierController extends Controller
 
             return $transaction->load('details');
         });
+
+        OrderPlaced::dispatch(
+            transactionNumber: $transaction->transaction_number,
+            grandTotal: $transaction->grand_total,
+            paymentMethod: $transaction->payment_method,
+            cashierName: auth()->user()->name,
+        );
 
         return response()->json([
             'message' => 'Transaksi berhasil disimpan.',
